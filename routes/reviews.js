@@ -1,7 +1,13 @@
 import express from "express";
 const router = express.Router();
 
-import { index, show, store, update, destroy } from '../controllers/movieController.js';
+import {
+    index,
+    show,
+    store,
+    update,
+    destroy
+} from '../controllers/reviewController.js';
 
 /* ROTTE */
 

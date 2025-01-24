@@ -7,6 +7,7 @@ import notFound from "./middlewares/notFound.js";
 import corsPolicy from "./middlewares/corsPolicy.js";
 // Routing
 import moviesRouter from "./routes/movies.js";
+import reviewsRouter from "./routes/reviews.js";
 
 // Creo un'istanza di express
 const app = express();
@@ -29,7 +30,8 @@ app.get("/", (req, res) => {
 });
 
 // Altre rotte
-app.use("/api/", moviesRouter);
+app.use("/api/movies", moviesRouter);
+app.use("/api/reviews", reviewsRouter);
 
 // Gestione errori applicazione
 app.use(errorsHandler);
