@@ -29,7 +29,13 @@ function show(req, res) {
     const id = parseInt(req.params.id);
     // Prima query: recupera il film con l'id corrispondente:
     // Creo la query SQL con le Prepared statements (? al posto di id) per evitare le SQL Injections:
-    const sql = "SELECT * FROM `movies` WHERE `id` = ?";
+    const sql = `SELECT movies.*, AVG(reviews.vote) AS vote_average, COUNT(reviews.text) AS num_review
+                FROM movies
+                LEFT JOIN reviews
+                ON reviews.movie_id = movies.id
+                WHERE movies.id = ?
+                GROUP BY movies.id
+                `;
     // Uso il metodo query() per passargli la query SQL, il valore di di id nel segnaposto "?", e una funzione di callback:
     connection.query(sql, [id], (err, results) => {
         // Se rilevo un errore restituisco l'errore HTTP 500 Internal Server Error” e un messaggio personalizzato:
