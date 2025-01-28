@@ -62,6 +62,26 @@ function show(req, res) {
 
 function store(req, res) { }
 
+// Agiunta dei commenti al singolo film
+function storeReview(req, res) {
+    // Recuperiamo l'id
+    const { id } = req.params;
+    // Recuperiamo il body
+    const {text, name, vote} = req.body;
+    // Prepariamo la query SQL con le Prepared statements (? al posto di id) per evitare le SQL Injections:
+    const sql = "INSERT INTO reviews (text, name, vote, movie_id) VALUES (?, ?, ?, ?)";
+    
+    // Eseguo la query
+    connection.query(sql, [text, name, vote, id], (err, results) => {
+        // Se rilevo un errore restituisco l'errore HTTP 500 Internal Server Error” e un messaggio personalizzato:
+        if (err) return res.status(500).json({ error: 'Query non trovata nel database' });
+        // Invio lo status 201: la richiesta HTTP è stata soddisfatta, è stata creata una nuova risorsa:
+        res.status(201);
+        // Invio un messaggio "Review added" con l'id della recensione:
+        res.json({message: "Review added", id: results.insertId});
+    })
+}
+
 function update(req, res) { }
 
 function destroy(req, res) {
@@ -83,4 +103,4 @@ function destroy(req, res) {
     });
 }
 
-export { index, show, store, update, destroy };
+export { index, show, store, storeReview, update, destroy };

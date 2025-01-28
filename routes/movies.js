@@ -1,7 +1,7 @@
 import express from "express";
 const router = express.Router();
 
-import { index, show, store, update, destroy } from '../controllers/movieController.js';
+import { index, show, store, storeReview, update, destroy } from '../controllers/movieController.js';
 
 /* ROTTE */
 
@@ -13,6 +13,9 @@ router.get("/:id", show);
 
 // Store - Create
 router.post("/", store);
+
+// Store - Create review
+router.post("/:id/reviews", storeReview);
 
 // Update - Update
 router.put("/:id", update);
