@@ -5,10 +5,17 @@ import CustomError from "../classes/CustomError.js";
 
 function index(req, res) {
     const limit = 3;
-    const { page } = req.query;
+    let { page } = req.query;
     // console.log(req.query);
+
     
-    const offset = limit * (page - 1);
+    // Se page è uguale a 0 o non esiste, imposto page a 1 così da visualizzare solo la prima pagina (altrimenti il server restituisce un errore):
+    !page || page === "0"
+        ? page = 1
+        : page;
+
+    
+        const offset = limit * (page - 1);
     // Recupero il conteggio totale dei film:
     const sqlCount = "SELECT COUNT(*) AS `count` FROM `movies`";
     // Uso il metodo query() per passargli la query SQL e una funzione di callback:
