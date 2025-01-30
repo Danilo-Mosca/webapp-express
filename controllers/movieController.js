@@ -4,24 +4,32 @@ import connection from "../connection.js";
 import CustomError from "../classes/CustomError.js";
 
 function index(req, res) {
-    // Recupero tutti i film e per ciascun film il numero delle recensioni e la media voto totale:
-    const sql = `SELECT movies.*, AVG(reviews.vote) AS vote_average, COUNT(reviews.text) AS num_review
-                FROM movies
-                LEFT JOIN reviews
-                ON reviews.movie_id = movies.id
-                GROUP BY movies.id`;
+    const limit = 3;
+    const { page } = req.query;
+    // console.log(req.query);
+    
+    const offset = limit * (page - 1);
+    // Recupero il conteggio totale dei film:
+    const sqlCount = "SELECT COUNT(*) AS `count` FROM `movies`";
     // Uso il metodo query() per passargli la query SQL e una funzione di callback:
-    connection.query(sql, (err, results) => {
+    connection.query(sqlCount, (err, results) => {
         // Se rilevo un errore nella chiamata al database, restituisco l'errore HTTP 500 Internal Server Error” e un messaggio personalizzato:
         if (err) res.status(500).json({ error: 'Errore del server' });
-        // console.log(results);
-        // Creo un oggetto contenente il conteggio totale dei film e il risultato della query precedente (items: results):
-        const response = {
-            count: results.length,
-            items: results,
-        }
-        //Rispondo con l'oggetto JSON riempito con i data ricevuti dall'interrogazione fatta al database
-        res.json(response);
+        const count = results[0].count;
+
+        // Filtro in base a limit e offset:
+        const sql = "SELECT * FROM `movies` LIMIT ? OFFSET ?";
+        connection.query(sql, [limit, offset], (err, results) => {
+            if (err) res.status(500).json({ error: 'Errore del server' });
+            // Creo un oggetto contenente il conteggio totale dei film e il risultato della query precedente (items: results):
+            const response = {
+                count,
+                limit,
+                items: results,
+            }
+            //Rispondo con l'oggetto JSON riempito con i data ricevuti dall'interrogazione fatta al database
+            res.json(response);
+        })
     });
 }
 
@@ -67,10 +75,10 @@ function storeReview(req, res) {
     // Recuperiamo l'id
     const { id } = req.params;
     // Recuperiamo il body
-    const {text, name, vote} = req.body;
+    const { text, name, vote } = req.body;
     // Prepariamo la query SQL con le Prepared statements (? al posto di id) per evitare le SQL Injections:
     const sql = "INSERT INTO reviews (text, name, vote, movie_id) VALUES (?, ?, ?, ?)";
-    
+
     // Eseguo la query
     connection.query(sql, [text, name, vote, id], (err, results) => {
         // Se rilevo un errore restituisco l'errore HTTP 500 Internal Server Error” e un messaggio personalizzato:
@@ -78,7 +86,7 @@ function storeReview(req, res) {
         // Invio lo status 201: la richiesta HTTP è stata soddisfatta, è stata creata una nuova risorsa:
         res.status(201);
         // Invio un messaggio "Review added" con l'id della recensione:
-        res.json({message: "Review added", id: results.insertId});
+        res.json({ message: "Review added", id: results.insertId });
     })
 }
 
