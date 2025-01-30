@@ -46,6 +46,16 @@ function store(req, res) { }
 function update(req, res) { }
 
 function destroy(req, res) {
+    const id = parseInt(req.params.id);
+    const sql = "SELECT * FROM reviews WHERE id = ?"
+    connection.query(sql, [id], (err, results) => {
+        if (!results[0]) return res.status(404).json({ error: "Not Found" });
+        const deleteSql = "DELETE FROM reviews WHERE id = ?"
+        connection.query(deleteSql, [id], (err) => {
+            if (err) return res.status(404).json({ error: "Item not fount" });
+            res.sendStatus(204)
+        })
+    })
 }
 
 export { index, show, store, update, destroy };
